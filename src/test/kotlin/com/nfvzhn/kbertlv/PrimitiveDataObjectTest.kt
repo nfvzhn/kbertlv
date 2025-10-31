@@ -26,7 +26,29 @@ class PrimitiveDataObjectTest {
 
         @ParameterizedTest
         @ArgumentsSource(TlvNumericTestArgumentProvider::class)
-        fun `Marshalling tests`(case: TlvNumericTestCase) {
+        fun `Marshalling tests`(case: TlvMarshallableTestCase) {
+            assertEquals(case.expected, case.tlv.marshall())
+        }
+    }
+
+    @Nested
+    inner class TlvAlphaNumericTest {
+
+        @Test
+        fun `When create alpha-numeric tag with value of N chars, Then tag length() should return N`() {
+            assertEquals(7, FileType("FTYPIIA").length)
+        }
+
+        @Test
+        fun `When alpha-numeric tag length overflow, Then throw IllegalArgumentException`() {
+            val seq = ApplicationLetterScheme("1234")
+            val e = assertThrows<IllegalArgumentException> { seq.marshall() }
+            assertEquals("Maximum value size=3 has been exceeded: ApplicationLetterScheme<0xdf8040=1234>", e.message)
+        }
+
+        @ParameterizedTest
+        @ArgumentsSource(TlvAlphaNumericTestArgumentProvider::class)
+        fun `Marshalling tests`(case: TlvMarshallableTestCase) {
             assertEquals(case.expected, case.tlv.marshall())
         }
     }
